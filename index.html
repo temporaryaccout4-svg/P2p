@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:black;
+  color:white;
+  overflow:hidden;
+}
+
+/* SCREENS */
+.screen{
+  display:none;
+  height:100vh;
+  width:100vw;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+}
+.show{display:flex;}
+
+/* INPUT */
+input{
+  padding:15px;
+  width:70%;
+  border-radius:20px;
+  border:2px solid #ff4d6d;
+  background:black;
+  color:white;
+}
+
+/* BUTTON */
+button{
+  padding:14px 25px;
+  border:none;
+  border-radius:25px;
+  background:#ff4d6d;
+  color:white;
+  margin-top:10px;
+}
+
+/* COUNT */
+#count{font-size:20vw;}
+
+/* LOADING */
+#loadingBox{
+  width:75%;
+  height:12px;
+  background:rgba(255,255,255,0.2);
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:15px;
+}
+
+#loadingBar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#ff4d6d,#6cf,#ffd86f);
+}
+
+#percent{font-size:6vw;margin-top:10px;}
+#funText{font-size:4vw;margin-top:10px;}
+
+/* PROPOSAL */
+#proposalImg{
+  width:90%;
+  opacity:0;
+  transform:translateY(150px) scale(0.6);
+  transition:all 2s ease;
+}
+
+#proposalText{
+  margin-top:20px;
+  font-size:4.5vw;
+  line-height:1.6;
+  padding:10px;
+  opacity:0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="screen show">
+  <h2>🔐 Enter Password</h2>
+  <input id="passInput">
+  <p id="error" style="color:red;"></p>
+  <button onclick="unlock()">Unlock</button>
+</div>
+
+<!-- COUNT -->
+<div id="countScreen" class="screen">
+  <h1 id="count">5</h1>
+</div>
+
+<!-- LOADING -->
+<div id="waitScreen" class="screen">
+  <h2>💌 Preparing something special...</h2>
+  <p id="funText">Loading...</p>
+
+  <div id="loadingBox">
+    <div id="loadingBar"></div>
+  </div>
+
+  <p id="percent">0%</p>
+</div>
+
+<!-- PROPOSAL -->
+<div id="proposal" class="screen">
+  <img id="proposalImg" src="proposal-card.jpg">
+  <p id="proposalText"></p>
+</div>
+
+<!-- ✅ MUSIC CHANGED HERE -->
+<audio id="music" src="tum-ho-toh.mp3"></audio>
+
+<script>
+
+const music=document.getElementById("music");
+
+/* SCREEN */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
+  document.getElementById(id).classList.add("show");
+}
+
+/* PASSWORD */
+function unlock(){
+  let val=passInput.value.trim().toLowerCase();
+
+  if(val==="angry bird"){
+    show("countScreen");
+    startCountdown();
+  }else{
+    error.innerText="Wrong password 💔";
+  }
+}
+
+/* COUNTDOWN */
+function startCountdown(){
+  let c=5;
+
+  let t=setInterval(()=>{
+    c--;
+    count.innerText=c;
+
+    if(c==0){
+      clearInterval(t);
+      music.play().catch(()=>{});
+      goNext();
+    }
+  },1000);
+}
+
+/* 29s LOADING */
+function goNext(){
+
+  show("waitScreen");
+
+  const funny=[
+    "Loading emotions 💖...",
+    "Preparing surprise 😏...",
+    "Almost ready 👀...",
+    "Heart syncing 💓...",
+    "Magic building ✨...",
+    "Don't blink 😳...",
+    "Final touches 🎬..."
+  ];
+
+  let progress=0;
+  let i=0;
+
+  const total=29000;
+  const step=100;
+  const inc=100/(total/step);
+
+  let textInt=setInterval(()=>{
+    funText.innerText=funny[i%funny.length];
+    i++;
+  },1200);
+
+  let load=setInterval(()=>{
+
+    progress+=inc;
+
+    if(progress>=100){
+      progress=100;
+
+      clearInterval(load);
+      clearInterval(textInt);
+
+      percent.innerText="100%";
+      loadingBar.style.width="100%";
+
+      setTimeout(()=>{
+        showProposal();
+      },800);
+
+    }else{
+      percent.innerText=Math.floor(progress)+"%";
+      loadingBar.style.width=progress+"%";
+    }
+
+  },step);
+}
+
+/* PROPOSAL ENTRY */
+function showProposal(){
+
+  show("proposal");
+
+  let img=proposalImg;
+
+  let roam=0;
+
+  let r=setInterval(()=>{
+
+    img.style.opacity="0.5";
+    img.style.transform=
+      `translate(${Math.random()*60-30}px,${Math.random()*60-30}px) scale(0.6)`;
+
+    if(++roam>8){
+      clearInterval(r);
+
+      setTimeout(()=>{
+        img.style.opacity="1";
+        img.style.transform="translate(0,0) scale(1)";
+        typeProposalText();
+      },500);
+    }
+
+  },200);
+}
+
+/* PROPOSAL TEXT */
+let proposalMessage = `
+I don’t know how to say this perfectly…
+but I’ve been holding it in my heart for a long time 💖
+
+From the moment you came into my life,
+everything started feeling better, brighter, and more meaningful.
+
+You became my comfort,
+my happiness,
+and my favourite person to think about 🌙
+
+So today… I just want to ask you one thing honestly…
+
+Will you be mine? ❤️
+`;
+
+function typeProposalText(){
+
+  let box=document.getElementById("proposalText");
+  box.innerHTML="";
+  box.style.opacity="1";
+
+  let i=0;
+
+  let t=setInterval(()=>{
+
+    box.innerHTML+=proposalMessage.charAt(i);
+    i++;
+
+    if(i>=proposalMessage.length){
+      clearInterval(t);
+    }
+
+  },40);
+}
+
+</script>
+</body>
+</html>
